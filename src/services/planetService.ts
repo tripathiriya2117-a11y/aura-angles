@@ -16,7 +16,7 @@ import {
   loadItems,
 } from "../storage/itemStorage";
 
-const API_URL = "http://10.97.213.135:5000";
+const API_URL = "https://aura-angles-api.onrender.com";
 
 export async function migrateLocalData() {
   const planets = await loadPlanets();
