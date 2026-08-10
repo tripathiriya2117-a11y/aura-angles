@@ -11,7 +11,22 @@ router.get("/planet/:planetId", async (req, res) => {
       planetId: req.params.planetId,
     });
 
-    res.json(collections);
+    const collectionsWithCounts =
+      await Promise.all(
+        collections.map(async (collection) => {
+          const count =
+            await Item.countDocuments({
+              collectionId: collection.id,
+            });
+
+          return {
+            ...collection.toObject(),
+            count,
+          };
+        })
+      );
+
+    res.json(collectionsWithCounts);
   } catch (error) {
     console.error(
       "Failed to fetch planet collections:",
@@ -23,7 +38,6 @@ router.get("/planet/:planetId", async (req, res) => {
     });
   }
 });
-
 // GET all items for a collection
 router.get("/:id/items", async (req, res) => {
   try {
