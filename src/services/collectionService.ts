@@ -1,6 +1,6 @@
 import { CollectionData } from "../types/collection";
 
-const API_URL = "http://10.97.213.135:5000";
+const API_URL = "https://aura-angles-api.onrender.com";
 
 export async function getCollections(
   planetId: string
