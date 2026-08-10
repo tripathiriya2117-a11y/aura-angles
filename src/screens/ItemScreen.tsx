@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -18,6 +19,8 @@ import { ItemData } from "../types/item";
 import {
   createItem,
   getItems,
+  updateItem,
+  deleteItem,
 } from "../services/itemService";
 
 export default function ItemScreen() {
@@ -34,6 +37,8 @@ export default function ItemScreen() {
   const [items, setItems] = useState<ItemData[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [editingItem, setEditingItem] =
+  useState<ItemData | null>(null);
 
   useEffect(() => {
     async function loadCollectionItems() {
@@ -51,15 +56,35 @@ export default function ItemScreen() {
     loadCollectionItems();
   }, [collection.id]);
 
-  async function handleSave() {
-    const trimmedTitle = title.trim();
-    const trimmedContent = content.trim();
+async function handleSave() {
+  const trimmedTitle = title.trim();
+  const trimmedContent = content.trim();
 
-    if (!trimmedTitle || !trimmedContent) {
-      return;
-    }
+  if (!trimmedTitle || !trimmedContent) {
+    return;
+  }
 
-    try {
+  try {
+    if (editingItem) {
+      const updatedItem: ItemData = {
+        ...editingItem,
+        title: trimmedTitle,
+        content: trimmedContent,
+        updatedAt: new Date().toISOString(),
+      };
+
+      await updateItem(updatedItem);
+
+      setItems((previous) =>
+        previous.map((item) =>
+          item.id === updatedItem.id
+            ? updatedItem
+            : item
+        )
+      );
+
+      setEditingItem(null);
+    } else {
       const now = new Date().toISOString();
 
       const newItem: ItemData = {
@@ -78,71 +103,143 @@ export default function ItemScreen() {
         ...previous,
         newItem,
       ]);
-
-      setTitle("");
-      setContent("");
-    } catch (error) {
-      console.error(
-        "Failed to save item:",
-        error
-      );
     }
+
+    setTitle("");
+    setContent("");
+  } catch (error) {
+    console.error(
+      "Failed to save item:",
+      error
+    );
   }
+}
+return (
+  <View style={styles.container}>
+    <Text style={styles.title}>
+      {collection.title}
+    </Text>
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>
-        {collection.title}
+    <Text style={styles.subtitle}>
+      {items.length} items
+    </Text>
+
+    <TextInput
+      value={title}
+      onChangeText={setTitle}
+      placeholder="Title"
+      placeholderTextColor={colors.textTertiary}
+      style={styles.input}
+    />
+
+    <TextInput
+      value={content}
+      onChangeText={setContent}
+      placeholder="Write something..."
+      placeholderTextColor={colors.textTertiary}
+      style={[styles.input, styles.contentInput]}
+      multiline
+    />
+
+    <Pressable
+      style={styles.saveButton}
+      onPress={handleSave}
+    >
+      <Text style={styles.saveText}>
+        {editingItem ? "Update" : "Save"}
       </Text>
+    </Pressable>
 
-      <Text style={styles.subtitle}>
-        {items.length} items
-      </Text>
-
-      <TextInput
-        value={title}
-        onChangeText={setTitle}
-        placeholder="Title"
-        placeholderTextColor={colors.textTertiary}
-        style={styles.input}
-      />
-
-      <TextInput
-        value={content}
-        onChangeText={setContent}
-        placeholder="Write something..."
-        placeholderTextColor={colors.textTertiary}
-        style={[styles.input, styles.contentInput]}
-        multiline
-      />
-
+    {editingItem && (
       <Pressable
-        style={styles.saveButton}
-        onPress={handleSave}
+        style={styles.cancelEditButton}
+        onPress={() => {
+          setEditingItem(null);
+          setTitle("");
+          setContent("");
+        }}
       >
-        <Text style={styles.saveText}>
-          Save
+        <Text style={styles.cancelEditText}>
+          Cancel Edit
         </Text>
       </Pressable>
+    )}
 
-      <View style={styles.items}>
-        {items.map((item) => (
-          <View
-            key={item.id}
-            style={styles.itemCard}
-          >
-            <Text style={styles.itemTitle}>
-              {item.title}
-            </Text>
+    <View style={styles.items}>
+      {items.map((item) => (
+        <Pressable
+          key={item.id}
+          style={styles.itemCard}
+          onLongPress={() => {
+            Alert.alert(
+              item.title,
+              "What do you want to do?",
+              [
+                {
+                  text: "Edit",
+                  onPress: () => {
+                    setEditingItem(item);
+                    setTitle(item.title);
+                    setContent(item.content);
+                  },
+                },
+                {
+                  text: "Delete",
+                  style: "destructive",
+                  onPress: () => {
+                    Alert.alert(
+                      "Delete item?",
+                      `Delete "${item.title}"?`,
+                      [
+                        {
+                          text: "Cancel",
+                          style: "cancel",
+                        },
+                        {
+                          text: "Delete",
+                          style: "destructive",
+                          onPress: async () => {
+                            try {
+                              await deleteItem(item.id);
 
-            <Text style={styles.itemContent}>
-              {item.content}
-            </Text>
-          </View>
-        ))}
-      </View>
+                              setItems((previous) =>
+                                previous.filter(
+                                  (current) =>
+                                    current.id !== item.id
+                                )
+                              );
+                            } catch (error) {
+                              console.error(
+                                "Failed to delete item:",
+                                error
+                              );
+                            }
+                          },
+                        },
+                      ]
+                    );
+                  },
+                },
+                {
+                  text: "Cancel",
+                  style: "cancel",
+                },
+              ]
+            );
+          }}
+        >
+          <Text style={styles.itemTitle}>
+            {item.title}
+          </Text>
+
+          <Text style={styles.itemContent}>
+            {item.content}
+          </Text>
+        </Pressable>
+      ))}
     </View>
-  );
+  </View>
+);
 }
 
 const styles = StyleSheet.create({
@@ -214,4 +311,15 @@ const styles = StyleSheet.create({
     marginTop: 6,
     lineHeight: 21,
   },
+  cancelEditButton: {
+  marginTop: 10,
+  alignItems: "center",
+  paddingVertical: 10,
+},
+
+cancelEditText: {
+  color: colors.textTertiary,
+  fontSize: 14,
+  fontWeight: "600",
+},
 });

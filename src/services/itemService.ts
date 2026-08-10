@@ -1,36 +1,90 @@
 import { ItemData } from "../types/item";
-import {
-  loadItems,
-  saveItems,
-} from "../storage/itemStorage";
+
+const API_URL = "https://aura-angles-api.onrender.com";
 
 export async function getItems(
   collectionId: string
 ): Promise<ItemData[]> {
-  const items = await loadItems();
-
-  return (items ?? []).filter(
-    (item) => item.collectionId === collectionId
+  const response = await fetch(
+    `${API_URL}/api/collections/${collectionId}/items`
   );
+
+  if (!response.ok) {
+    const error = await response.text();
+
+    throw new Error(
+      `Failed to fetch items: ${response.status} ${error}`
+    );
+  }
+
+  return (await response.json()) as ItemData[];
 }
 
 export async function createItem(
   item: ItemData
 ): Promise<ItemData> {
-  const items = await loadItems();
-  const existing = items ?? [];
+  const response = await fetch(
+    `${API_URL}/api/items`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(item),
+    }
+  );
 
-  if (
-    existing.some(
-      (existingItem) => existingItem.id === item.id
-    )
-  ) {
+  if (!response.ok) {
+    const error = await response.text();
+
     throw new Error(
-      `Item with ID "${item.id}" already exists.`
+      `Failed to create item: ${response.status} ${error}`
     );
   }
 
-  await saveItems([...existing, item]);
+  return (await response.json()) as ItemData;
+}
 
-  return item;
+export async function updateItem(
+  updatedItem: ItemData
+): Promise<ItemData> {
+  const response = await fetch(
+    `${API_URL}/api/items/${updatedItem.id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedItem),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.text();
+
+    throw new Error(
+      `Failed to update item: ${response.status} ${error}`
+    );
+  }
+
+  return (await response.json()) as ItemData;
+}
+
+export async function deleteItem(
+  itemId: string
+): Promise<void> {
+  const response = await fetch(
+    `${API_URL}/api/items/${itemId}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.text();
+
+    throw new Error(
+      `Failed to delete item: ${response.status} ${error}`
+    );
+  }
 }

@@ -1,59 +1,6 @@
 import { PlanetData } from "../types/planet";
-import {
-  loadPlanets,
-} from "../storage/planetStorage";
-
-
-
-
-//import { loadPlanets,} from "../storage/planetStorage";
-
-import {
-  loadCollections,
-} from "../storage/collectionStorage";
-
-import {
-  loadItems,
-} from "../storage/itemStorage";
 
 const API_URL = "https://aura-angles-api.onrender.com";
-
-export async function migrateLocalData() {
-  const planets = await loadPlanets();
-  const collections = await loadCollections();
-  const items = await loadItems();
-
-  const response = await fetch(
-    `${API_URL}/api/migrate`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        planets: planets ?? [],
-        collections: collections ?? [],
-        items: items ?? [],
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      `Migration failed: ${response.status}`
-    );
-  }
-
-  return response.json();
-}
-
-
-
-
-
-
-
-//const API_URL = "http://10.97.213.135:5000";
 
 export async function getPlanets(): Promise<PlanetData[]> {
   try {
