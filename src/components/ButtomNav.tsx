@@ -17,6 +17,7 @@ const ICON_MAP: Record<NavItem['icon'], keyof typeof Ionicons.glyphMap> = {
   planet: 'planet-outline',
   nova: 'sparkles',
   profile: 'person-circle-outline',
+  tasks: 'checkbox',
 };
 
 export function BottomNav({ items, activeId, onSelect, bottom }: BottomNavProps) {

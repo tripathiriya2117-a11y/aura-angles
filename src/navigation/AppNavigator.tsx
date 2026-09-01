@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "../screens/HomeScreen";
 import CollectionScreen from "../screens/CollectionScreen";
 import ItemScreen from "../screens/ItemScreen";
+import TasksScreen from "../screens/TasksScreen";
 
 import { PlanetData } from "../types/planet";
 import { CollectionData } from "../types/collection";
@@ -15,6 +16,7 @@ export type RootStackParamList = {
   Items: {
     collection: CollectionData;
   };
+  Tasks: undefined;
 };
 
 const Stack =
@@ -40,6 +42,11 @@ export default function AppNavigator() {
       <Stack.Screen
         name="Items"
         component={ItemScreen}
+      />
+
+      <Stack.Screen
+        name="Tasks"
+        component={TasksScreen}
       />
     </Stack.Navigator>
   );

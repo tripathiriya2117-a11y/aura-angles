@@ -8,6 +8,7 @@ const planetRoutes = require("./routes/planetRoutes");
 const migrationRoutes = require("./routes/migrationRoutes");
 const collectionRoutes = require("./routes/collectionRoutes");
 const itemRoutes = require("./routes/itemRoutes");
+const taskRoutes = require("./routes/taskRoutes");
 
 app.use(cors());
 app.use(express.json());
@@ -15,6 +16,7 @@ app.use("/api/planets", planetRoutes);
 app.use("/api/migrate", migrationRoutes);
 app.use("/api/collections", collectionRoutes);
 app.use("/api/items", itemRoutes);
+app.use("/api/tasks", taskRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({

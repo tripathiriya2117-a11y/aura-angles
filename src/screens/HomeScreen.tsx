@@ -19,8 +19,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-//import { migrateLocalData } from "../services/planetService";
-
+import VoiceButton from '../components/voice/VoiceButton';
 import { colors } from '../theme/colors';
 import { PlanetData, NavItem } from '../types/planet';
 import { GalaxyBackground } from '../components/GalaxyBackground';
@@ -45,6 +44,7 @@ const CANVAS_HEIGHT = SCREEN_HEIGHT * 1.2;
 const NAV_ITEMS: NavItem[] = [
   { id: 'home', icon: 'home', label: 'Home' },
   { id: 'explore', icon: 'planet', label: 'Explore' },
+  { id: 'tasks', icon: 'tasks', label: 'Tasks' },
   { id: 'nova', icon: 'nova', label: 'NOVA' },
   { id: 'profile', icon: 'profile', label: 'Profile' },
 ];
@@ -194,6 +194,9 @@ useEffect(() => {
         </GestureDetector>
       </SafeAreaView>
 
+      <VoiceButton />
+
+
       <View style={[styles.dragHint, { bottom: navBottom + 92 }]} pointerEvents="none">
         <View style={styles.dragDots}>
           <View style={styles.dragDot} />
@@ -214,7 +217,13 @@ useEffect(() => {
       <BottomNav
         items={NAV_ITEMS}
         activeId={activeNav}
-        onSelect={setActiveNav}
+        onSelect={(id) => {
+          setActiveNav(id);
+
+          if (id === 'tasks') {
+            navigation.navigate('Tasks');
+          }
+        }}
         bottom={navBottom}
       />
 

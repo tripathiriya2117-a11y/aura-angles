@@ -19,6 +19,6 @@ export interface PlanetData {
 
 export interface NavItem {
   id: string;
-  icon: 'home' | 'planet' | 'nova' | 'profile';
+  icon: 'home' | 'planet' | 'nova' | 'profile' | 'tasks';
   label: string;
 }
