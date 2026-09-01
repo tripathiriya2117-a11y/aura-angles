@@ -3,10 +3,24 @@ const Task = require("../models/Task");
 
 const router = express.Router();
 
+function generateId() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
 // CREATE a task
 router.post("/", async (req, res) => {
   try {
-    const task = new Task(req.body);
+    const taskData = { ...req.body };
+
+    if (!taskData.id) {
+      taskData.id = generateId();
+    }
+
+    const task = new Task(taskData);
 
     const savedTask = await task.save();
 
